@@ -4258,15 +4258,15 @@ async def streaming_chat_response_handler(response, ctx):
                     for result in results:
                         output_parts = [{'type': 'input_text', 'text': result.get('content', '')}]
 
-                        # Separate image data URIs (for LLM via input_image) from
-                        # other files (for frontend display via files attribute).
+                        # Send image data URIs to both the LLM (via input_image
+                        # for vision analysis) and the frontend (via display_files
+                        # so the user can see tool-generated images in chat).
                         display_files = []
                         for file_item in result.get('files', []):
                             if file_item.get('type') == 'image' and file_item.get('url', '').startswith('data:'):
-                                # LLM-only: add as input_image part (invisible to serialize_output)
                                 output_parts.append({'type': 'input_image', 'image_url': file_item['url']})
+                                display_files.append(file_item)
                             else:
-                                # Frontend display (MCP images, audio, etc.)
                                 display_files.append(file_item)
 
                         output.append(
